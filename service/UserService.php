@@ -242,4 +242,15 @@ class UserService
             return false;
         }
     }
+
+    //檢查存款
+    public function balancecheck($account)
+    {
+        $data = $this->read_single($account);
+
+        if (!isset($data['info'])) {
+            return array('Code1' => $data['Money'], 'Code2' => $data['Balance']);
+        }
+        return $data;
+    }
 }

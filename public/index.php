@@ -76,6 +76,13 @@ $router->get('/users', function ($request, $controller) {
     return json_encode($data);
 }, $usercontroller);
 
+$router->get('/balance', function ($request, $controller) {
+
+    $data = $controller->CheckBalance($request);
+
+    return json_encode($data);
+}, $usercontroller);
+
 //取得帳號權限
 $router->get('/user/{user}/{auth}', function ($request, $controller, $user, $auth) {
 
@@ -118,6 +125,12 @@ $router->post('/user/img', function ($request, $controller) {
 $router->patch('/user/address', function ($request, $controller) {
 
     $result  = $controller->ChangeAddress($request);
+    return json_encode($result);
+}, $usercontroller);
+
+$router->patch('/user/patch', function ($request, $controller) {
+
+    $result  = $controller->UpdateUser($request);
     return json_encode($result);
 }, $usercontroller);
 

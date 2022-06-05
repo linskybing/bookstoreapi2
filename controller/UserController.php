@@ -127,6 +127,15 @@ class UserController
         return  $result;
     }
 
+    //檢查是否繳納保證金
+    function CheckBalance()
+    {
+        $auth = Authentication::isAuth();
+        if (isset($auth['error'])) return $auth;
+        
+        return $this->userservice->balancecheck($auth);
+    }
+
     //帳號驗證是否存在
     public function AccountCheck($request, $account)
     {
@@ -182,6 +191,19 @@ class UserController
         } else {
             $result['info'] = $this->userservice->update($auth, array('Name' => $data['Name'], 'Address' => $data['Address']));
         }
+
+        return $result;
+    }
+
+    //更新使用者資訊
+    public function UpdateUser($request)
+    {
+        $auth = Authentication::isAuth();
+        if (isset($auth['error'])) return $auth;
+
+        $data = $request->getBody();
+
+        $result['info'] = $this->userservice->update($auth, $data);
 
         return $result;
     }
