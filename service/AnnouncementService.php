@@ -40,7 +40,7 @@ class AnnouncementService
                 array_push($response_arr['data'], $data_item);
             }
         } else {
-            $response_arr['info'] = '尚未有公告';
+            $response_arr = null;
         }
 
         return $response_arr;
@@ -49,7 +49,12 @@ class AnnouncementService
     //讀取單筆資料
     public function read_single($AnnouncementId)
     {
-        $query = "SELECT * FROM " . $this->obj->table . " WHERE AnnouncementId = " . $AnnouncementId . " AND DeletedAt IS NULL;";
+        $query = "SELECT *,u.Name
+                    FROM announcement a,
+                        users u
+                    WHERE AnnouncementId = " . $AnnouncementId . " AND
+                            a.Admin = u.Account AND
+                        a.DeletedAt IS NULL;";
 
         $stmt = $this->conn->prepare($query);
 
@@ -64,6 +69,8 @@ class AnnouncementService
                 'AnnouncementId' => $AnnouncementId,
                 'Title' => $Title,
                 'Content' => $Content,
+                'Admin' => $Admin,
+                'Name' => $Name,
                 'CreatedAt' => $CreatedAt,
                 'UpdatedAt' => $UpdatedAt,
                 'DeletedAt' => $DeletedAt
@@ -72,7 +79,7 @@ class AnnouncementService
             $response_arr = $data;
             return $response_arr;
         } else {
-            $response_arr['info'] = '公告不存在';
+            $response_arr = null;
             return $response_arr;
         }
     }
@@ -94,7 +101,7 @@ class AnnouncementService
         $stmt = $this->conn->prepare($query);
 
         $time = date('Y-m-d H:i:s');
-        
+
         $result = $stmt->execute(array(
             $data['Title'],
             $data['Content'],

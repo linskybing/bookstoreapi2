@@ -339,6 +339,12 @@ $router->get('/userrole', function ($request, $controller) {
     return json_encode($result);
 }, $userrolecontroller);
 
+$router->get('/userpermission', function ($request, $controller) {
+
+    $result = $controller->GetUserPermisson($request);
+    return json_encode($result);
+}, $userrolecontroller);
+
 $router->post('/userrole', function ($request, $controller) {
 
     $result = $controller->Post($request);

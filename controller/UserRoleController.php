@@ -24,6 +24,14 @@ class UserRoleController
         return $data;
     }
 
+    public function GetUserPermisson(){
+        $auth = Authentication::isAuth();
+        if (isset($auth['error'])) return $auth;
+
+        $data = $this->userole->readpermisson($auth);
+        return $data;
+    }
+
     public function Post($request)
     {
         $auth = Authentication::getPayload();
