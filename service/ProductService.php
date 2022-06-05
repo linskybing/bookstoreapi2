@@ -180,7 +180,7 @@ class ProductService
                         State = '" . $state . "' AND                        
                         Seller = '" . $auth . "'
                     GROUP BY ProductId
-                    ORDER BY CreatedAt	
+                    ORDER BY CreatedAt DESC
                     ";
 
         $stmt  = $this->conn->prepare($query);

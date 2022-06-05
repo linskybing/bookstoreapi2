@@ -93,7 +93,7 @@ class DealRecordController
 
         $data = $request->getBody();
 
-        $datadeal = $this->dealservice->read_single($id);        
+        $datadeal = $this->dealservice->read_single($id);
         if (isset($datadeal['RecordId'])) {
             if (isset($data['State']) && $data['State'] == '未歸還') {
                 date_default_timezone_set('Asia/Taipei');
@@ -164,11 +164,41 @@ class DealRecordController
     {
         $data = array();
         $taglist = $this->categroy->read();
-        foreach ($taglist as $item => $value) {
-            if (isset($taglist[$item]['Tag'])) {
-                $deal = $this->dealservice->readby_tag($taglist['Tag']);
+
+        foreach ($taglist['data'] as $item => $value) {
+            $temp = array();
+            if (isset($value['Tag'])) {
+                $temp['CategoryId'] = $value['CategoryId'];
+                $temp['Tag'] = $value['Tag'];
+                $deal = $this->dealservice->readby_tag($value['Tag']);
                 if ($deal['data']) {
-                    $data[$value] = $deal['data'];
+                    $temp['Data'] = $deal['data'];
+                }
+                array_push($data, $temp);
+            }
+        }
+
+        for ($i = 0; $i < Count($data); $i++) {
+
+            $key = $i;
+            if (!isset($data[$key]['Data'])) {
+                $data[$key]['Data'] = array();
+                $data[$key]['Total'] = 0;
+            } else {
+
+                $data[$key]['Total'] = 0;
+                for ($j = 0; $j < Count($data[$key]['Data']); $j++) {
+                    $data[$key]['Total'] += $data[$key]['Data'][$j]['Amount'] * $data[$key]['Data'][$j]['Count'];
+                }
+            }
+        }
+
+        for ($i = 0; $i < Count($data) - 1; $i++) {
+            for ($j = 0; $j < Count($data) - 1 - $i; $j++) {                
+                if ($data[$j]['Total'] < $data[$j + 1]['Total']) {
+                    $temp = $data[$j];
+                    $data[$j] = $data[$j + 1];
+                    $data[$j + 1] = $temp;
                 }
             }
         }
