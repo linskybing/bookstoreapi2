@@ -132,7 +132,7 @@ class UserController
     {
         $auth = Authentication::isAuth();
         if (isset($auth['error'])) return $auth;
-        
+
         return $this->userservice->balancecheck($auth);
     }
 
@@ -202,7 +202,11 @@ class UserController
         if (isset($auth['error'])) return $auth;
 
         $data = $request->getBody();
+        if (isset($data['Money'])) {
+            $userdata = $this->userservice->read_single($auth);
 
+            $data['Money'] = (int)$userdata['Money'] + (int) $data['Money'];
+        }
         $result['info'] = $this->userservice->update($auth, $data);
 
         return $result;

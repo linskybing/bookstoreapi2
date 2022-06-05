@@ -93,12 +93,12 @@ class DealRecordController
 
         $data = $request->getBody();
 
-        $datarole = $this->dealservice->read_single($id);
-        if (isset($datarole['RecordId'])) {
+        $datadeal = $this->dealservice->read_single($id);        
+        if (isset($datadeal['RecordId'])) {
             if (isset($data['State']) && $data['State'] == '未歸還') {
                 date_default_timezone_set('Asia/Taipei');
                 $data['StartTime'] =  date('Y-m-d H:i:s');
-                $data['EndTime'] = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . '+ ' . $datarole['Count'] . 'days'));
+                $data['EndTime'] = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . '+ ' . $datadeal['Count'] . 'days'));
             }
             if (isset($data['State']) && $data['State'] == '已歸還') {
                 date_default_timezone_set('Asia/Taipei');
@@ -106,26 +106,37 @@ class DealRecordController
             }
 
             if (isset($data['Customer_Agree']) && $data['Customer_Agree'] && !isset($data['State'])) {
-                $deal = $this->dealservice->read_single($datarole['RecordId']);
+                $deal = $this->dealservice->read_single($datadeal['RecordId']);
                 $body = $this->mailservice->getcancelbody($id);
                 $userdata = $this->memberservice->read_single($deal['Seller']);
                 $this->mailservice->sendmail($userdata['Email'], $body);
             }
 
             if (isset($data['Seller_Agree']) && $data['Seller_Agree'] && !isset($data['State'])) {
-                $deal = $this->dealservice->read_single($datarole['RecordId']);
+                $deal = $this->dealservice->read_single($datadeal['RecordId']);
                 $body = $this->mailservice->getcancelbody2($id);
                 $userdata = $this->memberservice->read_single($deal['Member']);
                 $this->mailservice->sendmail($userdata['Email'], $body);
             }
 
             if (isset($data['State']) && $data['State'] == '已取消') {
-                $product = $this->productservice->read_single($datarole['ProductId']);
-                $count  = $product['Inventory'] + $datarole['Count'];
+                $product = $this->productservice->read_single($datadeal['ProductId']);
+                $count  = $product['Inventory'] + $datadeal['Count'];
                 $update = array(
                     'Inventory' => $count
                 );
-                $this->productservice->update($datarole['ProductId'], $update);
+                $this->productservice->update($datadeal['ProductId'], $update);
+            }
+
+            if (isset($data['State']) && $data['State'] == '完成交易') {
+                $product = $this->productservice->read_single($datadeal['ProductId']);
+                $userdata = $this->memberservice->read_single($product['Seller']);
+                if ($datadeal['DealType'] == 'Rent') {
+                    $userdata['Money'] = (int)$userdata['Money'] + (int) $datadeal['Count'] * (int) $datadeal['RentPrice'];
+                } else {
+                    $userdata['Money'] = (int)$userdata['Money'] + (int) $datadeal['Count'] * (int) $datadeal['Price'];
+                }
+                $this->memberservice->update($userdata['Account'], array('Money' => $userdata['Money']));
             }
 
             $result['info'] = $this->dealservice->update($id, $data);
