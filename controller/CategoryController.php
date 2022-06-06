@@ -39,7 +39,7 @@ class CategoryController
         if (isset($auth['error'])) return $auth;
         if (!isset($auth['RoleId']) || !Authentication::hasPermission('商品種類管理', $auth['RoleId'])) return ['error' => '權限不足'];
 
-        $data = $request->getBody();       
+        $data = $request->getBody();
         $validate = Validator::check(array(
             'Tag' => ['required'],
         ), $data);
@@ -90,7 +90,7 @@ class CategoryController
         if (isset($data['CategoryId'])) {
             $result['info'] = $this->categoryservice->delete($id);
             return $result;
-        } else {
+        } else {            
             return ['error' => '種類不存在'];
         }
     }

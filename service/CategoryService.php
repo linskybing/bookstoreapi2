@@ -95,7 +95,6 @@ class CategoryService
 
         $result = $stmt->execute();
 
-
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             extract($row);
@@ -184,8 +183,8 @@ class CategoryService
     public function delete($CategoryId)
     {
         date_default_timezone_set('Asia/Taipei');
-        $query = 'UPDATE ' . $this->obj->table . " SET DeletedAt = '" . date('Y-m-d H:i:s') . "' WHERE CategoryId = " . $CategoryId . ";";
-
+        $query = 'DELETE FROM ' . $this->obj->table . " WHERE CategoryId = " . $CategoryId . ";";
+       
         $stmt = $this->conn->prepare($query);
 
         $result = $stmt->execute();
