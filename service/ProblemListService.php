@@ -25,7 +25,14 @@ class ProblemListService
                 break;
         }
 
-        $query = 'SELECT * FROM ' . $this->obj->table . " WHERE PostUser = '" . $user . "' AND State = '" . $string . "'AND DeletedAt IS NULL";
+        $query = "SELECT pl.* ,
+                        u.Name
+                    FROM problemlist pl,
+                        users u
+                    WHERE PostUser = '" . $user . "' AND
+                            State = '" . $string . "' AND 
+                            u.Account = pl.PostUser AND
+                            pl.DeletedAt IS NULL";
 
         $stmt  = $this->conn->prepare($query);
 
@@ -42,6 +49,7 @@ class ProblemListService
                     'Title' => $Title,
                     'Content' => $Content,
                     'PostUser' => $PostUser,
+                    'Name' => $Name,
                     'CreatedAt' => $CreatedAt,
                     'UpdatedAt' => $UpdatedAt,
                 );
@@ -65,7 +73,13 @@ class ProblemListService
                 $string = '已解決';
                 break;
         }
-        $query = 'SELECT * FROM ' . $this->obj->table . " WHERE State = '" . $string . "' AND DeletedAt IS NULL";
+        $query = "SELECT pl.*,
+                         u.Image,
+                         u.Name
+                    FROM problemlist pl,
+                         users u
+                    WHERE State = '" . $string . "' AND
+                        pl.PostUser = u.Account";
 
         $stmt  = $this->conn->prepare($query);
 
@@ -82,6 +96,8 @@ class ProblemListService
                     'Title' => $Title,
                     'Content' => $Content,
                     'PostUser' => $PostUser,
+                    'Name' => $Name,
+                    'PostUserImage' => $Image,
                     'CreatedAt' => $CreatedAt,
                     'UpdatedAt' => $UpdatedAt,
                 );

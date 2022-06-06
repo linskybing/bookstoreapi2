@@ -17,7 +17,14 @@ class ProblemReplyService
     public function read($ProblemId)
     {
 
-        $query = 'SELECT * FROM ' . $this->obj->table . ' WHERE ProblemId = ' . $ProblemId . ' AND DeletedAt IS NULL';
+        $query = "SELECT pr.*,
+                         u.Name,
+                         u.Image 
+                    FROM problemreply pr,
+                         users u 
+                    WHERE ProblemId = " . $ProblemId . " AND
+                        u.Account = pr.ReplyUser AND
+                    pr.DeletedAt IS NULL";
 
         $stmt  = $this->conn->prepare($query);
 
@@ -34,6 +41,8 @@ class ProblemReplyService
                     'ProblemId' => $ProblemId,
                     'Reply' => $Reply,
                     'ReplyUser' => $ReplyUser,
+                    'Name' => $Name,
+                    'ReplyUserImage' => $Image,
                     'CreatedAt' => $CreatedAt,
                     'UpdatedAt' => $UpdatedAt,
                 );
