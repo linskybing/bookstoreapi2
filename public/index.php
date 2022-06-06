@@ -345,6 +345,18 @@ $router->get('/userpermission', function ($request, $controller) {
     return json_encode($result);
 }, $userrolecontroller);
 
+$router->get('/userpermissiona', function ($request, $controller) {
+
+    $result = $controller->GetUserAllPermisson($request);
+    return json_encode($result);
+}, $userrolecontroller);
+
+$router->get('/readforall', function ($request, $controller) {
+
+    $result = $controller->readforall($request);
+    return json_encode($result);
+}, $userrolecontroller);
+
 $router->post('/userrole', function ($request, $controller) {
 
     $result = $controller->Post($request);

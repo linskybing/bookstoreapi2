@@ -103,6 +103,105 @@ class UserRoleService
         return $response_arr;
     }
 
+    //讀取角色權限相關資訊
+    public function readpermissonall()
+    {
+        $query = "SELECT r.RoleId,
+                         r.RoleName,
+                         f.FunctionId,
+                         f.FunctionName
+                FROM role r,
+                    rolepermissions rs,
+                    functionlist f
+                WHERE  r.RoleId = rs.RoleId AND
+                    rs.FunctionId = f.FunctionId";
+
+        $stmt  = $this->conn->prepare($query);
+
+        $result = $stmt->execute();
+
+        $num = $stmt->rowCount();
+
+        $response_arr = array();
+        if ($num > 0) {
+            $count = 0;
+            $nowid = 0;
+            $btn = true;
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                extract($row);
+                $data_item = array(
+                    'RoleId' => $RoleId,
+                    'RoleName' => $RoleName,
+                    'FunctionId' => $FunctionId,
+                    'FunctionName' => $FunctionName,
+                );
+                if ($nowid != $data_item['RoleId']) {
+                    $btn = true;
+                }
+                if ($btn) {
+                    $nowid = $data_item['RoleId'];
+                    $response_arr[$count] = array();
+
+                    $response_arr[$count] = array(
+                        'RoleId' => $data_item['RoleId'],
+                        'RoleName' => $data_item['RoleName']
+                    );
+                    $response_arr[$count]['Data'] = array();
+                    $btn = false;
+                }
+                array_push($response_arr[$count]['Data'], array(
+                    'FunctionId' => $data_item['FunctionId'],
+                    'FunctionName' => $data_item['FunctionName'],
+                ));
+            }
+        } else {
+            $response_arr = null;
+        }
+
+        return $response_arr;
+    }
+
+
+    //讀取角色權限相關資訊
+    public function readallpermisson()
+    {
+        $query = "SELECT u.Name,
+                        u.Account,
+                        ur.RoleId,
+                        r.RoleName                    
+                FROM users u,
+                    userrole ur,
+                    role r
+                                    
+                WHERE u.Account = ur.`User` AND
+                    ur.RoleId = r.RoleId ";
+
+        $stmt  = $this->conn->prepare($query);
+
+        $result = $stmt->execute();
+
+        $num = $stmt->rowCount();
+
+        $response_arr = array();
+
+        if ($num > 0) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                extract($row);
+                $data_item = array(
+                    'Name' => $Name,
+                    'Account' => $Account,
+                    'RoleId' => $RoleId,
+                    'RoleName' => $RoleName,
+                );
+                array_push($response_arr, $data_item);
+            }
+        } else {
+            $response_arr = null;
+        }
+
+        return $response_arr;
+    }
+
     //讀取單筆資料
     public function read_single($UserRoleId)
     {

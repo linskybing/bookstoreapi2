@@ -24,11 +24,21 @@ class UserRoleController
         return $data;
     }
 
-    public function GetUserPermisson(){
+    public function GetUserPermisson()
+    {
         $auth = Authentication::isAuth();
         if (isset($auth['error'])) return $auth;
 
         $data = $this->userole->readpermisson($auth);
+        return $data;
+    }
+
+    public function GetUserAllPermisson()
+    {
+        $auth = Authentication::isAuth();
+        if (isset($auth['error'])) return $auth;
+
+        $data = $this->userole->readallpermisson();
         return $data;
     }
 
@@ -71,5 +81,15 @@ class UserRoleController
         } else {
             return ['error' => '角色不存在'];
         }
+    }
+
+    public function readforall($request)
+    {
+        $auth = Authentication::getPayload();
+        if (isset($auth['error'])) return $auth;
+        if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
+
+        $result = $this->userole->readpermissonall();
+        return $result;
     }
 }
