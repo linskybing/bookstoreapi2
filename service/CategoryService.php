@@ -121,10 +121,11 @@ class CategoryService
         date_default_timezone_set('Asia/Taipei');
 
         $query = "INSERT INTO " . $this->obj->table .
-            "(Tag,                          
+            "(Tag,
+              Color,                          
                            CreatedAt,
                            UpdatedAt) 
-                           VALUES ( ? , ? , ? )";
+                           VALUES ( ? , ? , ? , ? )";
 
         $stmt = $this->conn->prepare($query);
 
@@ -132,6 +133,7 @@ class CategoryService
 
         $result = $stmt->execute(array(
             $data['Tag'],
+            $data['Color'],
             $time,
             $time
         ));
@@ -193,5 +195,22 @@ class CategoryService
         } else {
             return $response_arr['info'] = '資料刪除失敗';
         }
+    }
+
+    // Tag是否有商品
+    public function hasproduct($CategoryId)
+    {
+        $query = 'SELECT * 
+                    FROM taglist t
+                    WHERE t.CategoryId = ' . $CategoryId;
+        $stmt  = $this->conn->prepare($query);
+
+        $result = $stmt->execute();
+
+        $num = $stmt->rowCount();
+        if ($num > 0) {
+            return false;
+        }
+        return true;
     }
 }

@@ -37,14 +37,13 @@ class CategoryController
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (!Authentication::hasPermission('商品種類管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!isset($auth['RoleId']) || !Authentication::hasPermission('商品種類管理', $auth['RoleId'])) return ['error' => '權限不足'];
 
-        $data = $request->getBody();
-
+        $data = $request->getBody();       
         $validate = Validator::check(array(
             'Tag' => ['required'],
         ), $data);
-
+        if (!isset($data['Color'])) return ['error' => '商品顏色不可為空'];
         if ($validate != '') {
             return $validate;
         } else {
@@ -86,7 +85,7 @@ class CategoryController
         if (isset($auth['error'])) return $auth;
         if (!Authentication::hasPermission('商品種類管理', $auth['RoleId'])) return ['error' => '權限不足'];
 
-
+        if (!$this->categoryservice->hasproduct($id)) return ['error' => '商品種類已被使用不可刪除'];
         $data = $this->categoryservice->read_single($id);
         if (isset($data['CategoryId'])) {
             $result['info'] = $this->categoryservice->delete($id);
