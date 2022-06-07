@@ -318,7 +318,7 @@ class MailService
       </body>
     </html>
     ';
-    $url = "http://localhost/bookstore/view/transaction_detail_s.html?id=" . $id;
+    $url = "http://localhost/view/transaction_detail_s.html?id=" . $id;
     $body = str_replace('{{url}}', $url, $body);
     return $body;
   }
@@ -409,7 +409,7 @@ class MailService
       </body>
     </html>
     ';
-    $url = "http://localhost/bookstore/view/transaction_detail.html?id=" . $id;
+    $url = "http://localhost/view/transaction_detail.html?id=" . $id;
     $body = str_replace('{{url}}', $url, $body);
     return $body;
   }
