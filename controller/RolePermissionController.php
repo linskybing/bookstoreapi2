@@ -61,15 +61,15 @@ class RolePermissionController
     }
 
 
-    public function Delete($request, $id)
+    public function Delete($request, $id, $functionid)
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
         if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
 
-        $data = $this->permisson->read_single($id);
+        $data = $this->permisson->read_single_roleid($id, $functionid);        
         if (isset($data['PermissionId'])) {
-            $result = $this->permisson->delete($id);
+            $result = $this->permisson->delete($data['PermissionId']);
             return $result;
         } else {
             return ['error' => '權限不存在'];

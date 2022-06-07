@@ -76,6 +76,36 @@ class RolePermissionsService
         }
     }
 
+    //讀取單筆資料
+    public function read_single_roleid($roleid, $functionid)
+    {
+        $query = "SELECT * FROM " . $this->obj->table . " WHERE RoleId = " . $roleid . " AND FunctionId = " . $functionid . " AND DeletedAt IS NULL;";
+
+        $stmt = $this->conn->prepare($query);
+
+        $result = $stmt->execute();
+
+
+        if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            extract($row);
+
+            $data = array(
+                'PermissionId' => $PermissionId,
+                'RoleId' => $RoleId,
+                'FunctionId' => $FunctionId,
+                'CreatedAt' => $CreatedAt,
+                'UpdatedAt' => $UpdatedAt,
+            );
+
+            $response_arr = $data;
+            return $response_arr;
+        } else {
+            $response_arr['info'] = '權限不存在';
+            return $response_arr;
+        }
+    }
+
     //上傳商品
     public function post($data)
     {

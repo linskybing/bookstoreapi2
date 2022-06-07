@@ -92,4 +92,6 @@ class UserRoleController
         $result = $this->userole->readpermissonall();
         return $result;
     }
+
+  
 }

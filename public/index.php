@@ -318,15 +318,15 @@ $router->get('/permisson/{id}', function ($request, $controller, $id) {
     return json_encode($result);
 }, $permissioncontroller);
 
-$router->post('/permisson/{id}', function ($request, $controller, $id) {
+$router->post('/permisson', function ($request, $controller) {
 
-    $result = $controller->Post($request, $id);
+    $result = $controller->Post($request);
     return json_encode($result);
 }, $permissioncontroller);
 
-$router->delete('/permisson/{id}', function ($request, $controller, $id) {
+$router->delete('/permisson/{id}/{id}', function ($request, $controller, $id, $functionid) {
 
-    $result = $controller->Delete($request, $id);
+    $result = $controller->Delete($request, $id, $functionid);
     return json_encode($result);
 }, $permissioncontroller);
 

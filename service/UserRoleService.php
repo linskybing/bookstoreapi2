@@ -114,7 +114,7 @@ class UserRoleService
                     rolepermissions rs,
                     functionlist f
                 WHERE  r.RoleId = rs.RoleId AND
-                    rs.FunctionId = f.FunctionId";
+                    rs.FunctionId = f.FunctionId  AND r.DeletedAt IS NULL";
 
         $stmt  = $this->conn->prepare($query);
 
@@ -124,7 +124,7 @@ class UserRoleService
 
         $response_arr = array();
         if ($num > 0) {
-            $count = 0;
+            $count = -1;
             $nowid = 0;
             $btn = true;
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -140,11 +140,13 @@ class UserRoleService
                 }
                 if ($btn) {
                     $nowid = $data_item['RoleId'];
+                    $count++;
                     $response_arr[$count] = array();
 
                     $response_arr[$count] = array(
                         'RoleId' => $data_item['RoleId'],
-                        'RoleName' => $data_item['RoleName']
+                        'RoleName' => $data_item['RoleName'],
+                        'Count' => $this->checkuserrole($data_item['RoleId'])
                     );
                     $response_arr[$count]['Data'] = array();
                     $btn = false;
@@ -192,6 +194,7 @@ class UserRoleService
                     'Account' => $Account,
                     'RoleId' => $RoleId,
                     'RoleName' => $RoleName,
+
                 );
                 array_push($response_arr, $data_item);
             }
@@ -325,5 +328,23 @@ class UserRoleService
         $result = $stmt->execute();
 
         return ($stmt->rowCount() > 0) ? false : true;
+    }
+
+    public function checkuserrole($roleid)
+    {
+        $query = 'SELECT Count(*) AS Count FROM ' . $this->obj->table . " WHERE RoleId = " . $roleid;
+
+        $stmt = $this->conn->prepare($query);
+
+        $result = $stmt->execute();
+
+        $Count = 0;
+
+        if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            extract($row);
+        }
+
+        return $Count;
     }
 }
