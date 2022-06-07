@@ -114,7 +114,8 @@ class UserRoleService
                     rolepermissions rs,
                     functionlist f
                 WHERE  r.RoleId = rs.RoleId AND
-                    rs.FunctionId = f.FunctionId  AND r.DeletedAt IS NULL";
+                    rs.FunctionId = f.FunctionId  AND r.DeletedAt IS NULL
+                ORDER BY r.RoleId";
 
         $stmt  = $this->conn->prepare($query);
 
@@ -168,15 +169,15 @@ class UserRoleService
     public function readallpermisson()
     {
         $query = "SELECT u.Name,
-                        u.Account,
-                        ur.RoleId,
-                        r.RoleName                    
-                FROM users u,
-                    userrole ur,
-                    role r
-                                    
-                WHERE u.Account = ur.`User` AND
-                    ur.RoleId = r.RoleId ";
+                            u.Account,
+                            list.RoleId,
+                            list.RoleName                    
+                    FROM users u                   
+                    LEFT JOIN (SELECT r.*,ur.`User`
+                                        FROM role r,
+                                            userrole ur
+                                        WHERE ur.RoleId = r.RoleId)list                    
+                    ON u.Account = list.`User`";
 
         $stmt  = $this->conn->prepare($query);
 
@@ -271,11 +272,11 @@ class UserRoleService
     }
 
     //更新
-    public function update($UserRoleId, $data)
+    public function update($User, $data)
     {
         date_default_timezone_set('Asia/Taipei');
 
-        $query = $this->getupdatesql($UserRoleId, $data);
+        $query = $this->getupdatesql($User, $data);
 
         $stmt = $this->conn->prepare($query);
 
@@ -289,7 +290,7 @@ class UserRoleService
     }
 
     //取得更新sql 
-    public function getupdatesql($UserRoleId, $data)
+    public function getupdatesql($user, $data)
     {
         $query = "UPDATE " . $this->obj->table;
         $tempsql =  ' SET ';
@@ -297,7 +298,7 @@ class UserRoleService
             $tempsql .= $key . " = '" . $value . "', ";
         }
         $tempsql = substr($tempsql, 0, strrpos($tempsql, ','));
-        $query .= $tempsql . " , UpdatedAt = '" . date('Y-m-d H:i:s') . "' WHERE UserRoleId = " . $UserRoleId . ";";
+        $query .= $tempsql . " , UpdatedAt = '" . date('Y-m-d H:i:s') . "' WHERE User = '" . $user . "';";
         return $query;
     }
 

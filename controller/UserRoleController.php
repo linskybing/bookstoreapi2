@@ -46,7 +46,7 @@ class UserRoleController
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
 
         $data = $request->getBody();
 
@@ -67,12 +67,32 @@ class UserRoleController
         }
     }
 
+    public function UpdateUser($request)
+    {
+        $auth = Authentication::getPayload();
+        if (isset($auth['error'])) return $auth;
+        if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
+
+        $data = $request->getBody();
+
+        $validate = Validator::check(array(
+            'RoleId' => ['required'],
+            'User' => ['required']
+        ), $data);
+        if ($validate != '') {
+            return $validate;
+        }
+        $result = $this->userole->update($data['User'], array('RoleId' => $data['RoleId']));
+
+        return $result;
+    }
+
 
     public function Delete($request, $id)
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
 
         $data = $this->userole->read_single($id);
         if (isset($data['UserRoleId'])) {
@@ -92,6 +112,4 @@ class UserRoleController
         $result = $this->userole->readpermissonall();
         return $result;
     }
-
-  
 }

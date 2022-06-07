@@ -357,6 +357,12 @@ $router->get('/readforall', function ($request, $controller) {
     return json_encode($result);
 }, $userrolecontroller);
 
+$router->patch('/updateuserrole', function ($request, $controller) {
+
+    $result = $controller->UpdateUser($request);
+    return json_encode($result);
+}, $userrolecontroller);
+
 $router->post('/userrole', function ($request, $controller) {
 
     $result = $controller->Post($request);
