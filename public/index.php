@@ -181,6 +181,12 @@ $router->get('/product', function ($request, $controller) {
     return json_encode($result);
 }, $productcontroller);
 
+$router->get('/product/{id}/{type}', function ($request, $controller, $id, $type) {
+
+    $result = $controller->Recommend($request, $id, $type);
+    return json_encode($result);
+}, $productcontroller);
+
 $router->get('/incart/{id}', function ($request, $controller, $id) {
 
     $result = $controller->InCart($request, $id);
@@ -215,6 +221,12 @@ $router->get('/product/{id}', function ($request, $controller, $id) {
 $router->post('/product', function ($request, $controller) {
 
     $result = $controller->Post($request);
+    return json_encode($result);
+}, $productcontroller);
+
+$router->post('/productr', function ($request, $controller) {
+
+    $result = $controller->Post_Rent($request);
     return json_encode($result);
 }, $productcontroller);
 

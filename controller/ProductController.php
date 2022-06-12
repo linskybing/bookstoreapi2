@@ -93,7 +93,7 @@ class ProductController
                 $data = $this->productservice->read_single($id, null);
             } else {
                 $data = $this->productservice->read_single($id, $auth);
-            }            
+            }
             if (isset($data['ProductId'])) {
                 $img = $this->imageservice->read($data['ProductId']);
                 $category = $this->producttag->read($data['ProductId']);
@@ -135,6 +135,39 @@ class ProductController
                 $data['Seller'] = $auth;
 
                 $this->productservice->post($data);
+                $result['info'] = '新增成功';
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            return ['error' => '發生錯誤，請查看參數是否正確'];
+        }
+    }
+
+    public function Post_Rent($request)
+    {
+        try {
+            $auth = Authentication::isAuth();
+            if (isset($auth['error'])) return $auth;
+
+            $data = $request->getBody();
+
+            $validate = Validator::check(array(
+                'Name' => ['required'],
+                'Description' => ['required'],
+                'Price' => ['required'],
+                'Inventory' => ['required'],
+                'MaxRent' => ['required'],
+                'RentPrice' => ['required'],
+            ), $data);
+
+            if ($validate != '') {
+                $result['error'] = '資料欄位不可為空';
+            } else {
+
+                $data['Seller'] = $auth;
+
+                $this->productservice->post_rent($data);
                 $result['info'] = '新增成功';
             }
 
@@ -199,6 +232,19 @@ class ProductController
             $data = $this->productservice->incart($id, null);
         } else {
             $data = $this->productservice->incart($id, $auth);
+        }
+
+        return $data;
+    }
+
+    public function Recommend($request, $id, $type)
+    {
+        $auth = Authentication::isAuth();
+
+        if (isset($auth)) {
+            $data  = $this->productservice->recommendproduct(null, $id, $type);
+        } else {
+            $data  = $this->productservice->recommendproduct($auth, $id, $type);
         }
 
         return $data;

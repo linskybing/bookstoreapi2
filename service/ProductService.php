@@ -438,6 +438,52 @@ class ProductService
         return $response_arr;
     }
 
+    //上傳商品
+    public function post_rent($data)
+    {
+
+        date_default_timezone_set('Asia/Taipei');
+
+        $query = "INSERT INTO Product
+                              (Name,
+                               Description,
+                               Price,
+                               Inventory,                               
+                               Seller,
+                               Rent,
+                               MaxRent,                               
+                               RentPrice,                               
+                               CreatedAt,
+                               UpdatedAt)
+                           VALUES ( ? , ? , ? , ? , ? , ? , ? , ? , ? , ? )";
+
+        $stmt = $this->conn->prepare($query);
+
+        $time = date('Y-m-d H:i:s');
+
+        $result = $stmt->execute(array(
+            $data['Name'],
+            $data['Description'],
+            $data['Price'],
+            $data['Inventory'],
+            $data['Seller'],
+            1,
+            $data['MaxRent'],
+            $data['RentPrice'],
+            $time,
+            $time
+        ));
+
+        if ($result) {
+            $id = $this->conn->lastInsertId();
+            $response_arr = $this->read_single($id);
+        } else {
+
+            $response_arr['error'] = '資料新增失敗';
+        }
+        return $response_arr;
+    }
+
     //更新商品
     public function update($ProductId, $data)
     {
@@ -508,5 +554,87 @@ class ProductService
 
         if ($stmt->rowCount() > 0) return false;
         return true;
+    }
+
+    //推薦商品
+    public function recommendproduct($auth, $productid, $type)
+    {
+        switch ($type) {
+            case 0:
+                $string = "Buy";
+                break;
+            case 1:
+                $string = "Rent";
+                break;
+        }
+        $query = "
+        SELECT p.* ,
+                COUNT(*) AS DealCount,
+                p.ProductId IN (SELECT ProductId
+                                FROM shoppingcart sc,
+                                        shoppinglist sl
+                                WHERE sc.CartId = sl.CartId AND
+                                State = '未結帳' AND
+                                Member = '" . $auth . "') AS InCart
+        FROM recorddeal rd,
+            shoppinglist sl,
+            shoppingcart sc,
+            product p
+        WHERE rd.ShoppingId = sl.ShoppingId AND
+            sl.CartId = sc.CartId AND
+            sc.Member IN
+                (SELECT DISTINCT sc.Member
+                FROM recorddeal rd,
+                    shoppinglist sl,
+                    product p,
+                    shoppingcart sc
+                WHERE rd.ShoppingId = sl.ShoppingId AND
+                    sl.ProductId = p.ProductId AND
+                    rd.State = '完成交易' AND
+                    rd.DealType = '" . $string . "' AND
+                    sc.CartId = sl.CartId AND
+                    p.ProductId = " . $productid . ") AND		      
+                sl.ProductId <> " . $productid . " AND
+                rd.State = '完成交易' AND
+                sl.ProductId = p.ProductId AND
+                p.State = 'on' AND
+                p.Rent = " . $type . "
+        GROUP BY p.ProductId
+        ";
+        $stmt  = $this->conn->prepare($query);
+
+        $result = $stmt->execute();
+
+        $num = $stmt->rowCount();
+        if ($num > 0) {
+            $response_arr = array();
+            $response_arr['data'] = array();
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                extract($row);
+                $data_item = array(
+                    'ProductId' => $ProductId,
+                    'Name' => $Name,
+                    'InCart' => $InCart,
+                    'Description' => $Description,
+                    'Price' => $Price,
+                    'Inventory' => $Inventory,
+                    'State' => $State,
+                    'Rent' => $Rent,
+                    'MaxRent' => $MaxRent,
+                    'RentPrice' => $RentPrice,
+                    'Seller' => $Seller,
+                    'Watch' => $Watch,
+                    'CreatedAt' => $CreatedAt,
+                );
+
+                $data_item['Image'] = $this->imageservice->read($data_item['ProductId'])['data'];
+                $data_item['Category'] = $this->producttag->read($data_item['ProductId'])['data'];
+                array_push($response_arr['data'], $data_item);
+            }
+        } else {
+            $response_arr['data'] = null;
+        }
+
+        return $response_arr;
     }
 }
