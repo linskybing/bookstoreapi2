@@ -256,9 +256,9 @@ class ProductController
 
         $auth = Authentication::isAuth();
         if (isset($auth['error'])) {
-            $result = $this->productservice->read(null);
+            $result = $this->productservice->read_muti(null, $data);
         } else {
-            $result = $this->productservice->read($auth);
+            $result = $this->productservice->read_muti($auth, $data);
         }
 
         return $result;

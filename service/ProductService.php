@@ -87,6 +87,46 @@ class ProductService
         return $response_arr;
     }
 
+    //複合查詢
+    public function read_muti($auth = null, $data)
+    {
+        $query = "SELECT p.ProductId,
+                        Name,
+                        Description,
+                        Price,
+                        Inventory,                        
+                        State,
+                        Seller,
+                        Watch,
+                        p.CreatedAt,
+                        Rent,
+                        MaxRent,
+                        RentPrice,
+                        p.ProductId IN (SELECT ProductId
+                                        FROM shoppingcart sc,
+                                            shoppinglist sl
+                                        WHERE sc.CartId = sl.CartId AND
+                                            State = '未結帳' AND
+                                            Member = '" . $auth . "') AS InCart                        
+                    FROM product p                    
+                    WHERE p.DeletedAt IS NULL AND
+                        State = 'on' AND
+                                Rent = 0
+                    ORDER BY CreatedAt";
+        $addstring = "";
+        foreach ($data as $key => $value) {
+            if ($key == 'Name') {
+                $addstring .= " AND Name LIKE '%" . $value . "%'";
+            }
+            if ($key == 'MinPrice') {
+                $addstring .= " AND p.Price > " . $value;
+            }
+            if ($key == 'MaxPrice') {
+                $addstring .= " AND p.Price < " . $value;
+            }
+        }
+    }
+
     //讀取
     public function read_rent($auth = null)
     {
