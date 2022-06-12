@@ -45,6 +45,7 @@ class ProductService
                         WHERE p.DeletedAt IS NULL AND
                             State = 'on'
                         GROUP BY ProductId
+                        HAVING Rent = 0
                         ORDER BY CreatedAt";
 
 
@@ -180,6 +181,7 @@ class ProductService
                         State = '" . $state . "' AND                        
                         Seller = '" . $auth . "'
                     GROUP BY ProductId
+                    HAVING Rent = 0
                     ORDER BY CreatedAt DESC
                     ";
 
@@ -219,6 +221,73 @@ class ProductService
 
         return $response_arr;
     }
+
+    public function read_seller_rent($state,  $auth)
+    {
+
+
+        $query = "SELECT p.ProductId,
+                            Name,
+                            Description,
+                            Price,
+                            Inventory,
+                            Image,
+                            State,
+                            Seller,
+                            Watch,
+                            p.CreatedAt,
+                            Rent,
+                            MaxRent,
+                            RentPrice
+                    FROM product p
+                    LEFT JOIN productimage img
+                    ON p.ProductId = img.ProductId
+                    WHERE p.DeletedAt IS NULL AND
+                        State = '" . $state . "' AND                        
+                        Seller = '" . $auth . "'
+                    GROUP BY ProductId
+                    HAVING Rent = 1
+                    ORDER BY CreatedAt DESC
+                    ";
+
+        $stmt  = $this->conn->prepare($query);
+
+        $result = $stmt->execute();
+
+        $num = $stmt->rowCount();
+        if ($num > 0) {
+            $response_arr = array();
+            $response_arr['data'] = array();
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                extract($row);
+                $data_item = array(
+                    'ProductId' => $ProductId,
+                    'Name' => $Name,
+                    'Description' => $Description,
+                    'Price' => $Price,
+                    'Inventory' => $Inventory,
+                    'Image' => $Image,
+                    'State' => $State,
+                    'Rent' => $Rent,
+                    'MaxRent' => $MaxRent,
+                    'RentPrice' => $RentPrice,
+                    'Seller' => $Seller,
+                    'Watch' => $Watch,
+                    'CreatedAt' => $CreatedAt,
+                );
+                $data_item['Image'] = $this->imageservice->read($data_item['ProductId'])['data'];
+                $data_item['Category'] = $this->producttag->read($data_item['ProductId'])['data'];
+
+                array_push($response_arr['data'], $data_item);
+            }
+        } else {
+            $response_arr['data'] = null;
+        }
+
+        return $response_arr;
+    }
+
+
     public function incart($ProductId, $auth = null)
     {
         $query  = "
@@ -291,8 +360,7 @@ class ProductService
                         FROM product p
                         LEFT JOIN productimage img
                         ON p.ProductId = img.ProductId
-                        WHERE p.DeletedAt IS NULL AND
-                            State = 'on' AND 
+                        WHERE p.DeletedAt IS NULL AND                           
                             p.ProductId = " . $ProductId . "
                         GROUP BY ProductId
                         ORDER BY CreatedAt

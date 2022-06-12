@@ -69,24 +69,41 @@ class ProductController
         }
     }
 
+    public function Get_Seller_Rent($request, $state)
+    {
+
+        try {
+
+            $auth = Authentication::isAuth();
+            if (isset($auth['error'])) return $auth;
+            $data = $this->productservice->read_seller_rent($state, $auth);
+            return $data;
+        } catch (Exception $e) {
+
+            return ['error' => '發生錯誤，請查看參數是否正確'];
+        }
+    }
+
     public function Get_Single($request, $id)
     {
         try {
             $auth = Authentication::isAuth();
+
             if (isset($auth['error'])) {
                 $data = $this->productservice->read_single($id, null);
             } else {
                 $data = $this->productservice->read_single($id, $auth);
-            }
+            }            
             if (isset($data['ProductId'])) {
                 $img = $this->imageservice->read($data['ProductId']);
                 $category = $this->producttag->read($data['ProductId']);
                 $reivew = $this->dealreviewservice->readbyproduct($data['ProductId']);
                 $user = $this->userservice->read_single($data['Seller']);
+
+                $data['SellerImg'] = $user['Image'];
+                $data['SellerName'] = $user['Name'];
+                $data['SellerActive'] = $user['Active'];
             }
-            $data['SellerImg'] = $user['Image'];
-            $data['SellerName'] = $user['Name'];
-            $data['SellerActive'] = $user['Active'];
             if (isset($img['data'])) $data['Image'] = $img['data'];
             if (isset($category['data'])) $data['Category'] = $category['data'];
             if (isset($reivew['data'])) $data['Review'] = $reivew['data'];
