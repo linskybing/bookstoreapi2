@@ -249,4 +249,18 @@ class ProductController
 
         return $data;
     }
+
+    public function MutiSearch($request)
+    {
+        $data = $request->getBody();
+
+        $auth = Authentication::isAuth();
+        if (isset($auth['error'])) {
+            $result = $this->productservice->read(null);
+        } else {
+            $result = $this->productservice->read($auth);
+        }
+
+        return $result;
+    }
 }

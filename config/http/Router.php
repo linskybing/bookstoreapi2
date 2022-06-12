@@ -110,7 +110,9 @@ class Router
 
       $methodDictionary = $this->{strtolower($this->request->requestMethod)};
 
-      list($formatedRoute, $argCount) = $this->formatUri($this->request->requestUri);
+      $uri = explode("?", $this->request->requestUri);
+      
+      list($formatedRoute, $argCount) = $this->formatUri($uri[0]);
 
       if (isset($methodDictionary[$formatedRoute][0])) {
 
@@ -124,7 +126,7 @@ class Router
           foreach ($temp as $i) {
             array_push($varlist, $i);
           }
-        }        
+        }
         echo call_user_func_array($method, $varlist);
       } else {
 
