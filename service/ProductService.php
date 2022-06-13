@@ -90,41 +90,159 @@ class ProductService
     //複合查詢
     public function read_muti($auth = null, $data)
     {
-        $query = "SELECT p.ProductId,
-                        Name,
-                        Description,
-                        Price,
-                        Inventory,                        
-                        State,
-                        Seller,
-                        Watch,
-                        p.CreatedAt,
-                        Rent,
-                        MaxRent,
-                        RentPrice,
-                        p.ProductId IN (SELECT ProductId
-                                        FROM shoppingcart sc,
-                                            shoppinglist sl
-                                        WHERE sc.CartId = sl.CartId AND
-                                            State = '未結帳' AND
-                                            Member = '" . $auth . "') AS InCart                        
-                    FROM product p                    
-                    WHERE p.DeletedAt IS NULL AND
-                        State = 'on' AND
-                                Rent = 0
-                    ORDER BY CreatedAt";
+        $query = "SELECT *
+                    FROM(SELECT p.ProductId,
+                            Name,
+                            Description,
+                            Price,
+                            Inventory,                        
+                            State,
+                            Seller,
+                            Watch,
+                            p.CreatedAt,
+                            Rent,
+                            MaxRent,
+                            RentPrice,
+                            p.ProductId IN (SELECT ProductId
+                                            FROM shoppingcart sc,
+                                                shoppinglist sl
+                                            WHERE sc.CartId = sl.CartId AND
+                                                State = '未結帳' AND
+                                                Member = '" . $auth . "') AS InCart,
+                            (SELECT lists
+                                    FROM 
+                                    (SELECT 
+                                    CONCAT(GROUP_CONCAT(Tag)) AS lists,
+                                    ProductId
+                                    FROM (SELECT tl.ProductId,c.Tag 
+                                        FROM taglist tl,
+                                        category c
+                                        WHERE tl.CategoryId = c.CategoryId) AS taglist
+                                    GROUP BY ProductId) AS totaltag
+                                    RIGHT JOIN 	product a
+                                    ON totaltag.ProductId = a.ProductId
+                                    WHERE p.ProductId = a.ProductId)list,
+                            IFNULL((SELECT SUM(CustomerScore) / COUNT(CustomerScore) AS AverageScore
+                                    FROM recorddeal rd,
+                                          dealreview dr,
+                                          shoppinglist sp
+                                    WHERE rd.RecordId = dr.RecordId AND
+                                            sp.ShoppingId = rd.ShoppingId
+                                    GROUP BY sp.ProductId
+                                    HAVING ProductId = p.ProductId),0) AS AverageScore
+                                                                                    
+                            FROM product p                    
+                            WHERE p.DeletedAt IS NUll)AAA
+                WHERE State = 'on' ";
+
         $addstring = "";
+        $last = "";
         foreach ($data as $key => $value) {
             if ($key == 'Name') {
                 $addstring .= " AND Name LIKE '%" . $value . "%'";
             }
-            if ($key == 'MinPrice') {
-                $addstring .= " AND p.Price > " . $value;
+            if ($key == 'Price') {
+                $param = explode(",", $value);
+                $addstring .= " AND Price > " . $param[0];
+                if ($param[0] != 700) {
+                    $addstring .= " AND Price < " . $param[1];
+                }
             }
             if ($key == 'MaxPrice') {
-                $addstring .= " AND p.Price < " . $value;
+                $addstring .= " AND Price < " . $value;
+            }
+            if ($key == 'Category' && strlen($value) > 0) {
+                $param = explode(",", $value);
+                $addstring .= " AND (";
+                $count = 1;
+                foreach ($param as $item) {
+                    $string = "list LIKE '";
+                    $string .= "%" . $item . "%";
+                    $string .=  "' ";
+
+                    if ($count < Count($param)) {
+                        $string .= "OR ";
+                    } else {
+                        $string .= ")";
+                    }
+                    $addstring .= $string;
+                    $count++;
+                }
+            }
+            if ($key = 'Sort') {
+                $param = explode(",", $value);
+                foreach ($param as $item) {
+                    switch ($item) {
+                        case "pricedesc":
+                            if ($last != "") {
+                                $last .= ", Price DESC";
+                                break;
+                            } else {
+                                $last .= "ORDER BY Price DESC";
+                                break;
+                            }
+                        case "reviewasc": {
+                                if ($last != "") {
+                                    $last .= ", AverageScore";
+                                    break;
+                                } else {
+                                    $last .= "ORDER BY AverageScore";
+                                    break;
+                                }
+                            }
+                    }
+                }
             }
         }
+
+        $query .= $addstring;
+
+
+        if ($last != "") {
+            $query .= $last;
+        } else {
+            $query .= " ORDER BY Price ASC,
+            AverageScore DESC,
+            CreatedAt ";
+        }
+
+        $stmt  = $this->conn->prepare($query);
+
+        $result = $stmt->execute();
+
+        $num = $stmt->rowCount();
+        if ($num > 0) {
+            $response_arr = array();
+            $response_arr['data'] = array();
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                extract($row);
+                $data_item = array(
+                    'ProductId' => $ProductId,
+                    'Name' => $Name,
+                    'AverageScore' => $AverageScore,
+                    'InCart' => $InCart,
+                    'Description' => $Description,
+                    'Price' => $Price,
+                    'Inventory' => $Inventory,
+                    'State' => $State,
+                    'Rent' => $Rent,
+                    'MaxRent' => $MaxRent,
+                    'RentPrice' => $RentPrice,
+                    'Seller' => $Seller,
+                    'Watch' => $Watch,
+                    'CreatedAt' => $CreatedAt,
+                );
+
+                $data_item['Image'] = $this->imageservice->read($data_item['ProductId'])['data'];
+                $data_item['Category'] = $this->producttag->read($data_item['ProductId'])['data'];
+
+                array_push($response_arr['data'], $data_item);
+            }
+        } else {
+            $response_arr['data'] = null;
+        }
+
+        return $response_arr;
     }
 
     //讀取
