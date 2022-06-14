@@ -187,6 +187,12 @@ $router->get('/mutisearch', function ($request, $controller) {
     return json_encode($result);
 }, $productcontroller);
 
+$router->get('/mutisearchr', function ($request, $controller) {
+
+    $result = $controller->MutiSearchRent($request);
+    return json_encode($result);
+}, $productcontroller);
+
 $router->get('/product/{id}/{type}', function ($request, $controller, $id, $type) {
 
     $result = $controller->Recommend($request, $id, $type);

@@ -263,4 +263,18 @@ class ProductController
 
         return $result;
     }
+
+    public function MutiSearchRent($request)
+    {
+        $data = $request->getBody();
+
+        $auth = Authentication::isAuth();
+        if (isset($auth['error'])) {
+            $result = $this->productservice->read_muti_rent(null, $data);
+        } else {
+            $result = $this->productservice->read_muti_rent($auth, $data);
+        }
+
+        return $result;
+    }
 }
