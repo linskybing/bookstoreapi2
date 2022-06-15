@@ -144,9 +144,23 @@ class ProductService
             }
             if ($key == 'Price') {
                 $param = explode(",", $value);
-                $addstring .= " AND Price > " . $param[0];
-                if ($param[0] != 700) {
-                    $addstring .= " AND Price < " . $param[1];
+                $addstring .= " AND (";
+                $count = 1;
+                foreach ($param as $item) {
+                    $itemvalue =  explode("_", $item);
+                    if ($itemvalue[0] != 700) {
+                        $string = " ( Price >= " . $itemvalue[0];
+                        $string .= " AND Price <= " . $itemvalue[1] . " ) ";
+                    } else {
+                        $string = " ( Price >= " . $itemvalue[0] . " ) ";
+                    }
+                    if ($count < Count($param)) {
+                        $string .= " OR ";
+                    } else {
+                        $string .= ")";
+                    }
+                    $addstring .= $string;
+                    $count++;
                 }
             }
             if ($key == 'MaxPrice') {
@@ -162,7 +176,7 @@ class ProductService
                     $string .=  "' ";
 
                     if ($count < Count($param)) {
-                        $string .= "OR ";
+                        $string .= " OR ";
                     } else {
                         $string .= ")";
                     }
@@ -302,9 +316,23 @@ class ProductService
             }
             if ($key == 'Price') {
                 $param = explode(",", $value);
-                $addstring .= " AND Rent > " . $param[0];
-                if ($param[0] != 700) {
-                    $addstring .= " AND Rent < " . $param[1];
+                $addstring .= " AND (";
+                $count = 1;
+                foreach ($param as $item) {
+                    $itemvalue =  explode("_", $item);
+                    if ($itemvalue[0] != 700) {
+                        $string = " ( RentPrice >= " . $itemvalue[0];
+                        $string .= " AND RentPrice <= " . $itemvalue[1] . " ) ";
+                    } else {
+                        $string = " ( RentPrice >= " . $itemvalue[0] . " ) ";
+                    }
+                    if ($count < Count($param)) {
+                        $string .= " OR ";
+                    } else {
+                        $string .= ")";
+                    }
+                    $addstring .= $string;
+                    $count++;
                 }
             }
             if ($key == 'Category' && strlen($value) > 0) {
@@ -331,10 +359,10 @@ class ProductService
                     switch ($item) {
                         case "pricedesc":
                             if ($last != "") {
-                                $last .= ", Price DESC";
+                                $last .= ", RentPrice DESC";
                                 break;
                             } else {
-                                $last .= "ORDER BY Price DESC";
+                                $last .= "ORDER BY RentPrice DESC";
                                 break;
                             }
                         case "reviewasc": {
@@ -357,11 +385,10 @@ class ProductService
         if ($last != "") {
             $query .= $last;
         } else {
-            $query .= " ORDER BY Price ASC,
+            $query .= " ORDER BY RentPrice ASC,
             AverageScore DESC,
             CreatedAt ";
         }
-
         $stmt  = $this->conn->prepare($query);
 
         $result = $stmt->execute();

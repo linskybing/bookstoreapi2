@@ -178,6 +178,7 @@ class DealRecordController
             }
         }
 
+        
         for ($i = 0; $i < Count($data); $i++) {
 
             $key = $i;
@@ -193,8 +194,9 @@ class DealRecordController
             }
         }
 
+        // 排序
         for ($i = 0; $i < Count($data) - 1; $i++) {
-            for ($j = 0; $j < Count($data) - 1 - $i; $j++) {                
+            for ($j = 0; $j < Count($data) - 1 - $i; $j++) {
                 if ($data[$j]['Total'] < $data[$j + 1]['Total']) {
                     $temp = $data[$j];
                     $data[$j] = $data[$j + 1];
