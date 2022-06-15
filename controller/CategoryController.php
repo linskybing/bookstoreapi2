@@ -37,7 +37,7 @@ class CategoryController
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (!isset($auth['RoleId']) || !Authentication::hasPermission('商品種類管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!isset($auth['RoleId']) || !Authentication::hasPermission('商品種類管理', $auth['Account'])) return ['error' => '權限不足'];
 
         $data = $request->getBody();
         $validate = Validator::check(array(
@@ -57,7 +57,7 @@ class CategoryController
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
 
-        if (!Authentication::hasPermission('商品種類管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!Authentication::hasPermission('商品種類管理', $auth['Account'])) return ['error' => '權限不足'];
 
         $data = $request->getBody();
 
@@ -83,7 +83,7 @@ class CategoryController
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (!Authentication::hasPermission('商品種類管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!Authentication::hasPermission('商品種類管理', $auth['Account'])) return ['error' => '權限不足'];
 
         if (!$this->categoryservice->hasproduct($id)) return ['error' => '商品種類已被使用不可刪除'];
         $data = $this->categoryservice->read_single($id);

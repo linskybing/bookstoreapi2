@@ -178,7 +178,54 @@ class DealRecordController
             }
         }
 
-        
+
+        for ($i = 0; $i < Count($data); $i++) {
+
+            $key = $i;
+            if (!isset($data[$key]['Data'])) {
+                $data[$key]['Data'] = array();
+                $data[$key]['Total'] = 0;
+            } else {
+
+                $data[$key]['Total'] = 0;
+                for ($j = 0; $j < Count($data[$key]['Data']); $j++) {
+                    $data[$key]['Total'] += $data[$key]['Data'][$j]['Amount'] * $data[$key]['Data'][$j]['Count'];
+                }
+            }
+        }
+
+        // 排序
+        for ($i = 0; $i < Count($data) - 1; $i++) {
+            for ($j = 0; $j < Count($data) - 1 - $i; $j++) {
+                if ($data[$j]['Total'] < $data[$j + 1]['Total']) {
+                    $temp = $data[$j];
+                    $data[$j] = $data[$j + 1];
+                    $data[$j + 1] = $temp;
+                }
+            }
+        }
+        return $data;
+    }
+
+    public function TagForRentChart($request)
+    {
+        $data = array();
+        $taglist = $this->categroy->read();
+
+        foreach ($taglist['data'] as $item => $value) {
+            $temp = array();
+            if (isset($value['Tag'])) {
+                $temp['CategoryId'] = $value['CategoryId'];
+                $temp['Tag'] = $value['Tag'];
+                $deal = $this->dealservice->readby_tag_rent($value['Tag']);
+                if ($deal['data']) {
+                    $temp['Data'] = $deal['data'];
+                }
+                array_push($data, $temp);
+            }
+        }
+
+
         for ($i = 0; $i < Count($data); $i++) {
 
             $key = $i;

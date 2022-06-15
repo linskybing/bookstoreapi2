@@ -628,6 +628,13 @@ $router->get('/dealrforchart', function ($request, $controller) {
     return json_encode($result);
 }, $dealcontroller);
 
+
+
+$router->get('/dealrforchartr', function ($request, $controller) {
+    $result = $controller->TagForRentChart($request);
+    return json_encode($result);
+}, $dealcontroller);
+
 $router->get('/dealrs/{state}', function ($request, $controller, $state) {
 
     $result = $controller->Get_Seller($request, $state);

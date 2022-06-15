@@ -19,7 +19,7 @@ class RoleController
     {        
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!Authentication::hasPermission('權限管理', $auth['Account'])) return ['error' => '權限不足'];
 
         $data = $this->roleservice->read();
         return $data;
@@ -29,7 +29,7 @@ class RoleController
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!Authentication::hasPermission('權限管理', $auth['Account'])) return ['error' => '權限不足'];
 
         $data = $this->roleservice->read_single($id);
         return $data;
@@ -39,7 +39,7 @@ class RoleController
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!Authentication::hasPermission('權限管理', $auth['Account'])) return ['error' => '權限不足'];
 
         $data = $request->getBody();
 
@@ -60,7 +60,7 @@ class RoleController
         
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!Authentication::hasPermission('權限管理', $auth['Account'])) return ['error' => '權限不足'];
 
         $data = $request->getBody();
 
@@ -86,7 +86,7 @@ class RoleController
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (!Authentication::hasPermission('權限管理', $auth['RoleId'])) return ['error' => '權限不足'];
+        if (!Authentication::hasPermission('權限管理', $auth['Account'])) return ['error' => '權限不足'];
 
         $data = $this->roleservice->read_single($id);
         if (isset($data['RoleName'])) {

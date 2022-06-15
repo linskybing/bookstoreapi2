@@ -201,22 +201,19 @@ class RolePermissionsService
         return ($stmt->rowCount() > 0) ? false : true;
     }
 
-    public function hasPermission($functionname, $roleid)
+    public function hasPermission($functionname, $user)
     {
-        if ($roleid != null) {
-            $query = "SELECT RoleId , FunctionName
+
+        $query = "SELECT p.RoleId , FunctionName
                   FROM functionlist fl,
-                       rolepermissions p
-                  WHERE fl.FunctionId  = p.FunctionId 
+                       rolepermissions p,
+                       userrole ur
+                  WHERE fl.FunctionId  = p.FunctionId AND
+                        ur.RoleId = p.RoleId AND
+                        ur.`User` = '" . $user . "'
                         AND FunctionName = '" . $functionname . "'
-                        AND RoleId = " . $roleid;
-        } else {
-            $query = "SELECT RoleId , FunctionName
-                  FROM functionlist fl,
-                       rolepermissions p
-                  WHERE fl.FunctionId  = p.FunctionId 
-                        AND FunctionName = '" . $functionname . "'";
-        }
+                        ";
+
 
 
         $stmt = $this->conn->prepare($query);

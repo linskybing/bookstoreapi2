@@ -194,6 +194,54 @@ class DealRecordService
                         p.ProductId = sl.ProductId AND
                         p.ProductId = tl.ProductId AND
                         c.CategoryId = tl.CategoryId AND
+                        rd.DealType = 'Buy' AND
+                        c.Tag = '" . $tag . "'
+        ";
+
+        $stmt  = $this->conn->prepare($query);
+
+        $result = $stmt->execute();
+
+        $num = $stmt->rowCount();
+        if ($num > 0) {
+            $response_arr = array();
+            $response_arr['data'] = array();
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                extract($row);
+                $data_item = array(
+                    'RecordId' => $RecordId,
+                    'Name' => $Name,
+                    'Count' => $Count,
+                    'Amount' => $Amount,
+                    'Time' => $Time,
+                );
+                array_push($response_arr['data'], $data_item);
+            }
+        } else {
+            $response_arr['data'] = null;
+        }
+
+        return $response_arr;
+    }
+
+    //標籤讀取資料
+    public function readby_tag_rent($tag)
+    {
+        $query = "SELECT rd.RecordId,
+                        p.Name,
+                        sl.Count,
+                        (sl.Count * p.RentPrice) AS Amount,
+                        sl.CreatedAt AS Time
+                    FROM recorddeal rd,
+                        shoppinglist sl,
+                        product p,
+                        category c,
+                        taglist tl
+                    WHERE rd.ShoppingId = sl.ShoppingId AND 
+                        p.ProductId = sl.ProductId AND
+                        p.ProductId = tl.ProductId AND
+                        c.CategoryId = tl.CategoryId AND
+                        rd.DealType = 'Rent' AND
                         c.Tag = '" . $tag . "'
         ";
 

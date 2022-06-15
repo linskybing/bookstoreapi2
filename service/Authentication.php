@@ -33,7 +33,7 @@ class Authentication
         }
     }
 
-    public static function hasPermission($function, $roleid)
+    public static function hasPermission($function, $user)
     {
         $db_user = 'root';
         $db_password = '';
@@ -42,7 +42,7 @@ class Authentication
         $db = new PDO('mysql:host=127.0.0.1;dbname=' . $db_name . ';charset=utf8', $db_user, $db_password);
         $permission = new RolePermissionsService($db);
 
-        return $permission->hasPermission($function, $roleid);
+        return $permission->hasPermission($function, $user);
     }
 
     public static function isCreator($craetor, $user)
