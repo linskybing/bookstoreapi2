@@ -194,10 +194,11 @@ class DealRecordService
                         p.ProductId = sl.ProductId AND
                         p.ProductId = tl.ProductId AND
                         c.CategoryId = tl.CategoryId AND
+                        rd.State = '完成交易' AND
                         rd.DealType = 'Buy' AND
                         c.Tag = '" . $tag . "'
         ";
-
+       
         $stmt  = $this->conn->prepare($query);
 
         $result = $stmt->execute();
@@ -240,7 +241,8 @@ class DealRecordService
                     WHERE rd.ShoppingId = sl.ShoppingId AND 
                         p.ProductId = sl.ProductId AND
                         p.ProductId = tl.ProductId AND
-                        c.CategoryId = tl.CategoryId AND
+                        c.CategoryId = tl.CategoryId AND 
+                        rd.State = '完成交易' AND
                         rd.DealType = 'Rent' AND
                         c.Tag = '" . $tag . "'
         ";

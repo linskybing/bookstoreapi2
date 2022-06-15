@@ -37,7 +37,7 @@ class CategoryController
     {
         $auth = Authentication::getPayload();
         if (isset($auth['error'])) return $auth;
-        if (!isset($auth['RoleId']) || !Authentication::hasPermission('商品種類管理', $auth['Account'])) return ['error' => '權限不足'];
+        if (!isset($auth['Account']) || !Authentication::hasPermission('商品種類管理', $auth['Account'])) return ['error' => '權限不足'];
 
         $data = $request->getBody();
         $validate = Validator::check(array(
