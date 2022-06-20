@@ -24,7 +24,7 @@ class RolePermissionController
         $data = $this->permisson->read($roleid);
         return $data;
     }
-
+//XD
     public function Get_Single($request, $id)
     {
         $auth = Authentication::getPayload();
@@ -51,7 +51,7 @@ class RolePermissionController
         if ($validate != '') {
             return $validate;
         } else {
-            if ($this->permisson->checkinsert($data['Account'], $data['FunctionId'])) {
+            if ($this->permisson->checkinsert($data['RoleId'], $data['FunctionId'])) {
                 $result = $this->permisson->post($data);
                 return $result;
             } else {
